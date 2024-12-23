@@ -226,8 +226,11 @@ And we do see some events, and if we scroll down a little bit and see the "host"
 
 Now it is time to do this same setup on our Active Directory (Windows Server). Also, change the name of the Windows Server machine to ADDC01. And change the IP address of the machine to the value on the diagram.
 
+![image](https://github.com/user-attachments/assets/53b7704d-c4dc-4d39-9802-c17d61fa98c8)
 
+After this all we need to do is follow the same steps to install both splunk and sysmon so I am not going to show this part. If we have followed all the steps successfully, we would be seeing two hosts.
 
+![image](https://github.com/user-attachments/assets/0d29d672-503a-48df-b508-fdc9b13489f7)
 
 
 
