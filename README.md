@@ -100,9 +100,29 @@ Now we nned to add a user to the vboxsf group. Follow by typring `sudo adduser "
 
 Now you would be able to add the user. 
 
-Next step is to create a new directory: `mkdir share`. After creating the directory 'share', we want to run the following command to mount our shared folder on the directory called 'share': `sudo mount -t vboxsf -o uid=1000,gid=1000 dL share/`
+Next step is to create a new directory: `mkdir share`. After creating the directory 'share', we want to run the following command to mount our shared folder on the directory called 'share': `sudo mount -t vboxsf -o uid=1000,gid=1000 dL share/`. After this step, you will now be able to see the 'share' folder as highlighted.
 
 ![image](https://github.com/user-attachments/assets/56393a4c-4557-4cdc-82ce-2ecb37dd74ff)
+
+Now you can go into this directory and run the installation command: `sudo dpkg -i splunk` and tab to complete the Splunk file.
+
+![image](https://github.com/user-attachments/assets/8337160e-d12c-46e7-95d5-18ba61d23b7e)
+
+After the installation is complete, we go to the Splunk directory with `cd /opt/splunk/`.
+
+![image](https://github.com/user-attachments/assets/4f1efdb9-b276-453d-af6b-cab394d23edf)
+
+You will notice that most of the users and group are splunk i.e it belongs to splunk, which is good because it limits permission to that user. Let's change into the user Splunk by typing `sudo -u splunk bash`.
+Now we are acting as the user splunk. Change into the directory called 'bin' as the files listed here are all binaries that Splunk can use. Here we run the command `./splunk start` to run the installer. Accepting the agreement and then creating a username and password, our installation will be completed. The Splunk web interface is at http://splunk:8000 or http://"SplunkIPAddress":8000.
+
+Let's run one more command to make sure that our Splunk starts up every time our virtual machine reboots. Type 'exit' to exit out of the user splunk first. Then go to the 'bin' directory again under the main user, whatever it is for you. And run: `sudo ./splunk enable boot-start -user splunk`. This will make it so that anytime the VM reboots, Splunk will run with the user splunk.
+
+![image](https://github.com/user-attachments/assets/343a825a-3fd5-40e5-a99c-54af67e58b7a)
+
+
+
+
+
 
 
 
