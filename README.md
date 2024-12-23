@@ -119,6 +119,135 @@ Let's run one more command to make sure that our Splunk starts up every time our
 
 ![image](https://github.com/user-attachments/assets/343a825a-3fd5-40e5-a99c-54af67e58b7a)
 
+### Splunk Forwarder and Sysmon
+Now we have to install the Splunk Universal Forwarder and Sysmon on both our target machine and our server.
+
+First, let's start with renaming our PC to Target-PC. After restarting our target PC, we first check our IP address.
+
+We do not have to change the IP address of the target machine since there is no IP conflict per our diagram.
+
+![image](https://github.com/user-attachments/assets/d54766d3-e2c8-4e07-a217-63e9456fdb69)
+
+We do not have to change the IP address of the target machine since there is no IP conflict per our diagram.
+
+Now let's open a browser window and try to connect to our Splunk server. Our Splunk IP address was 192.168.10.10, and we know that Splunk listens to port 8000:
+
+![image](https://github.com/user-attachments/assets/6c9d5af8-477f-4035-8b65-92010a85ad24)
+
+And as you can see, we can connect to its login page with no problem. Now let's install the Splunk Universal Forwarder on this machine so we can forward our logs to the Splunk server. Go to the Splunk website and log in with the account that you created. And download the Universal Forwarder for Windows.
+
+![image](https://github.com/user-attachments/assets/86617b1e-5e07-4e12-9562-db61435a80fd)
+
+After the download is complete, start the setup.
+
+![image](https://github.com/user-attachments/assets/1f8c7fd5-7cfc-4a8b-b270-78ad67faabd5)
+
+On the next page, for the username, you can put anything you like. I will put "Admin" and clicked the "Generate random password". On the next page, for the deployment server, just skip without entering anything because we don't have one.
+
+On the next page, which is the Indexer page, here we will enter our Splunk server's IP and put the port as 9997, which is the default port for the Splunk indexer. Then click "Next" and start the installation.
+
+![image](https://github.com/user-attachments/assets/c391ce75-cb9f-4fed-a1ed-9d21da76a64b)
+
+Meanwhile, lets download sysmon, so go to <a href ="https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon"> Sysmon - Sysinternals | Microsoft Learn </a> and download Sysmon. The Sysmon configuration that we will be using is Olaf. So go to the <a href="https://github.com/olafhartong/sysmon-modular">GitHub - olafhartong/sysmon-modular: A repository of sysmon configuration modules </a> and download the `sysmonconfig.xml`.
+
+![image](https://github.com/user-attachments/assets/f2bc4654-d327-4bd6-88e7-36f8bc471817)
+
+You can click "Raw" and right-click "Save as" and download the file. Next, go to the downloads directory and extract Sysmon from the zip file.
+
+![image](https://github.com/user-attachments/assets/e8450122-d931-49dc-89b1-242a55d69d3e)
+
+Open up a PowerShell in administrator mode and go to the location of this directory. You can copy the location from the menu bar and paste it into the PowerShell with the cd command. To install Sysmon, run the command `.\Sysmon64.exe -i` with a configuration file. And since the config file that we installed is in the downloads folder, we can run this command: `.\Sysmon64.exe -i ..\sysmonconfig.xml`
+
+![image](https://github.com/user-attachments/assets/c7ce2073-3965-4f95-a192-7d9294a295ab)
+
+And Sysmon will be installed shortly. And meanwhile, our Splunk Universal Forwarder is also installed.
+
+Now is the most important part. We need to instruct our Splunk Forwarder on what we want to send over to our Splunk server. To do this, we must configure a file called input.conf. This file is located at `C:\Program Files\SplunkUniversalForwarder\etc\system\default`
+But we will not edit the `input.conf` file under the default directory because the configs in this directory are there just in case we mess anything up, so we will create a new file under the local directory.
+
+Now, to be able to create a new file in the local directory, we need to be an administrator. So to do this, we will search for Notepad from the search bar and open it as an administrator.
+
+```
+[WinEventLog://Application]
+index = endpoint
+disabled = false
+
+[WinEventLog://Security]
+index = endpoint
+disabled = false
+
+[WinEventLog://System]
+index = endpoint
+disabled = false
+
+[WinEventLog://Microsoft-Windows-Sysmon/Operational]
+index = endpoint
+disabled = false
+renderXml = true
+source = XmlWinEventLog:Microsoft-Windows-Sysmon/Operational
+```
+You can copy and paste this into the new Notepad that you opened. This is instructing our Splunk Forwarder to push events related to the application, security, system, and also Sysmon to our Splunk server.
+
+Important note: See that the index that we are pointing to is index = endpoint. This is important because whatever events fall under these categories will be sent over to Splunk and placed under the index "endpoint". If our Splunk server does not have an index named "endpoint", it will not receive any of these events.
+
+After filling in the config file, save it under the local directory as we mentioned before as inputs.conf. `C:\Program Files\SplunkUniversalForwarder\etc\system\local`
+
+![image](https://github.com/user-attachments/assets/28f461d2-e99e-4dbe-955c-7d65fc328ee2)
+
+Do note that anytime you update the inputs.conf file, you must restart the Splunk Universal Forwarder service. To do this, we open the Services as an administrator and find the "SplunkForwarder".
+
+Another important note: If we see that the "Log on as" line is "NT SERVICE":
+
+![image](https://github.com/user-attachments/assets/cbd291c0-4578-42fa-9a19-509598076bd4)
+
+Go on and double-click it, and look at the "Log On" tab from the menu:
+
+If you see that it is using "This account" and it is "NT SERVICE\SplunkForwarder", it might not be able to collect some of the logs due to some of the permissions. So you want to select "Local System account" and hit "Apply".
+
+![image](https://github.com/user-attachments/assets/888f0f44-d8a6-45db-a24d-486569c8f932)
+
+Which then will ask us to stop and restart the service, and we will do so. Just double-check on the Services menu that SplunkForwarder is "Log on as" Local System and also that Sysmon64 is running.
+
+After finishing these steps, we can finalize our Splunk server configuration. Head over to "http://192.168.10.10:8000/" and log in with the credentials that we set during the Splunk server installation.
+
+On the menu, we want to go to the Indexes from the Settings menu. Now recall that our index name was "endpoint" from the Splunk Universal Forwarder `inputs.conf file`. We now will create this index. Just click on the "New Index" button from the top right and enter the name "endpoint" and save.
+
+![image](https://github.com/user-attachments/assets/2263bf0f-3ca2-4dfb-b389-253405aaa24f)
+
+Now you will be able to see the "endpoint" index on the list. Next, we need to make sure that we enable our Splunk server to receive the data. In order to do that, go to Settings > Forwarding and receiving and under the "Receive data", click on the Configure receiving button, and there click on the New Receiving Port on the top right, and recall that during the setup, we mentioned that the default port is 9997, enter it and hit save.
+
+Now at this point, if we set up everything correctly, we should start seeing data coming in from our target machine. Click on the Apps from the top left corner, and select Search & Reporting. And here on the search bar, write index="endpoint" and click enter.
+
+![image](https://github.com/user-attachments/assets/20e14130-1326-4a81-8598-d3db57c75225)
+
+And we do see some events, and if we scroll down a little bit and see the "host" field from the left, we see that it is TARGET-PC. We also see some sources and sourcetypes, which is exactly what we entered in our input.conf file on the Target-PC.
+
+![image](https://github.com/user-attachments/assets/59270892-2d52-4cc4-a266-ee6ee357781b)
+
+Now it is time to do this same setup on our Active Directory (Windows Server). Also, change the name of the Windows Server machine to ADDC01. And change the IP address of the machine to the value on the diagram.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
