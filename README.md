@@ -3,7 +3,7 @@
 ## Index
 - [Introduction](#introduction)
 - [Setup VMs](#setup-vms)
-    
+-   
 
 ## Introduction
 The primary objective of this project is to design and implement an Active Directory environment integrated with Splunk for comprehensive event monitoring and analysis. By simulating a brute force attack using Kali Linux and conducting additional testing with Atomic Red Team, the project aims to provide hands-on experience in setting up and managing IT infrastructure, detecting potential threats, and analyzing system events. This initiative is intended to enhance skills in IT administration, event telemetry, threat detection, and response, equipping participants with practical knowledge for real-world cybersecurity challenges.
@@ -68,6 +68,52 @@ We have already set up our Windows 10 and Kali Linux in our <a href="https://git
   ![image](https://github.com/user-attachments/assets/90ec2a44-051c-441c-9189-20e4e3d761f4)
 
   ![image](https://github.com/user-attachments/assets/405da4ce-6e6e-4bd1-86eb-aab6d280d419)
+
+## Installation of Software
+Before we install our main software splunk and sysmon, we need to setup our Network in VirtualBox so that all VMs can communicate with each other and have same internet access. On VirtualBox go to tools -> Network -> Click on NAT Network. Then click create. In general options we are going to enter the name and IP address that we have previously decided.
+
+![image](https://github.com/user-attachments/assets/57450ca7-a706-49fb-8bb4-0b51814f32d0)
+
+Next we are going to connect all the VMs to the network we have just created. To connect we select the VM and then go to its Settings -> Network and select the "Attached to" option as "NAT Network", select the network name. Follow this step for all the other VMs.
+
+![image](https://github.com/user-attachments/assets/0e0b9b87-cf4c-4557-8947-ed8f7f0fbeea)
+
+Now in our diagram we have given splunk a static ip address of 192.168.10.10. In order to do that we need to `sudo nano /etc/netplan/00-installer-config.yaml`. Follow the following and setup everything accordingly.
+
+![image](https://github.com/user-attachments/assets/f74eb84b-f03c-4841-9fd3-8b0451fc2d15)
+
+After saving and exiting with Ctrl + X and Enter, write ` sudo netplan apply `, and after we check our IP with the command `ip a` and ping google.com to confirm we have the correct IP and also a connection.
+
+### Splunk
+
+On our host machine we are going to install Splunk file. To do this go to splunk website, login/register, go to free trials in Product section. We want to install .deb file, because we are using Linux server.
+
+![image](https://github.com/user-attachments/assets/b7a8663e-d782-4e39-afd7-fa2403bf9d81)
+
+Next step is to install Guest Addons for VirtualBox. ` sudo apt-get install virtualbox-guest-additions-iso `, Then we click on the shared folder settings, And click on the "Add a new shared folder" button. Here, the folder that we want to select is the one where the Splunk .deb installation file resides. Select all options: Read-Only, Auto-mount, and Make-Permanent, and click OK.And reboot the VM with `sudo reboot`.
+
+![image](https://github.com/user-attachments/assets/a8fc043d-1e12-4a81-aa1e-2d01f285e1d0)
+
+Now we nned to add a user to the vboxsf group. Follow by typring `sudo adduser "yourusername" vboxsf`. If there is an error you may need to add additional installation that virtualbox offers and reboot after installation.
+
+![image](https://github.com/user-attachments/assets/e60859a6-3d5e-47ff-9afb-bbc148141c06)
+
+Now you would be able to add the user. 
+
+Next step is to create a new directory: `mkdir share`. After creating the directory 'share', we want to run the following command to mount our shared folder on the directory called 'share': `sudo mount -t vboxsf -o uid=1000,gid=1000 dL share/`
+
+![image](https://github.com/user-attachments/assets/56393a4c-4557-4cdc-82ce-2ecb37dd74ff)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
