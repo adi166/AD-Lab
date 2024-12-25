@@ -232,9 +232,114 @@ After this all we need to do is follow the same steps to install both splunk and
 
 ![image](https://github.com/user-attachments/assets/0d29d672-503a-48df-b508-fdc9b13489f7)
 
+## Install and Configure Active Directory
+Now we need to install Active Directory onto our server and then promote it to a Domain Controller. And then we will be configuring the target machine to join this domain. Double-check the IP address of the Windows Server using `ipconfig` command in cmd, and then open Server Manager and on the top right go to Manager > Add Roles and Features.
+
+![image](https://github.com/user-attachments/assets/90602133-22d0-4c46-8e03-af4e8739e560)
+
+Click "Next" and on the next page, select "Role-based or feature-based installation".
+
+![image](https://github.com/user-attachments/assets/eab18e16-3fec-42e4-a92b-e83204e89f7e)
+
+Next, you will select the server from the list, since we only have one server, there will be only one on the list, and we select and go "Next".
+
+![image](https://github.com/user-attachments/assets/35c582c2-0733-4b9e-9184-2fe460f49163)
+
+On the next page, we will set the Server Roles. Here we want to select the Active Directory Domain Services.
+
+![image](https://github.com/user-attachments/assets/088ebf90-ce17-4a5e-915f-6b0c5e9fe2dc)
+
+Click on the "Add Features" on the pop-up page and go "Next".
+
+![image](https://github.com/user-attachments/assets/4644bd3e-2a4a-4b82-807e-1e30f620e359)
+
+From this point, click on "Next" until you get to the "Install" step, and start installing.
+Click on "Close" when you see this "Installation succeeded" message.
 
 
+![image](https://github.com/user-attachments/assets/9295064a-01a3-4cdb-95f5-f780a247787f)
 
+On the top right, click on the Flag with the yellow sign and click on "Promote this server to a domain controller".
+
+![image](https://github.com/user-attachments/assets/ebcf2021-bebc-4673-9c12-eace6f8bb5e5)
+
+And next, select the "Add a new forest" option because we are creating a brand new domain.
+
+![image](https://github.com/user-attachments/assets/50af48b2-8e78-4bb8-b695-3d077557e176)
+
+And next, select the "Add a new forest" option because we are creating a brand new domain. 
+
+![image](https://github.com/user-attachments/assets/81ba4bac-4808-4e0b-8784-86710286b834)
+
+Now, as a domain name, we will add it as "addLAB.local". The domain name must have a top-level domain, so in other words, the domain name cannot be just "addLAB", it must be "addLAB.something". On the next page, leave everything as it is and create a password, and from this point, just click "Next" for the upcoming pages.
+
+![image](https://github.com/user-attachments/assets/a4c30fdb-b1b4-4c23-90e8-115fe3c5bbc2)
+
+Quick note for this page: These are the paths used to store our database file named "NTDS.dit", and for your information, attackers love to target domain controllers, not only because it has access to everything but also because of this file as it contains everything related to Active Directory, including password hashes. If you do notice any unauthorized activity towards this file, you can assume that your entire domain is unfortunately compromised. Click "Next" a couple more times, and after all prerequisite checks have passed, click on "Install".
+
+Once the setup is completed, the server will automatically restart. And we will see our domain followed by a backslash, which indicates that we successfully installed ADDS and promoted our server to a domain controller. Next step is to start creating some users, so let's log in and do just that.
+
+On our server manager, we want to click on the Tools at the top right corner and select Active Directory Users and Computers.
+
+![image](https://github.com/user-attachments/assets/40a0f66c-563d-4acc-8b39-0deaccd8cfca)
+
+And if we click on the "Builtin", we see all of the groups listed on the right side. These groups have all been automatically created by the AD, and we can double-click any of these and read the description.
+
+![image](https://github.com/user-attachments/assets/1e7a5c79-fd33-4f3e-837e-b7f371b46337)
+
+And under the "Members" tab, we will see who is assigned to this group, and under the "Member Of" tab, we will see what groups this group is in. Note: You cannot add additional groups within a built-in group, but you can create a custom group and add that built-in group to that custom group.
+
+Now if we click on the "Users" folder, we see different users and groups in here. You can right-click and create a group or user here, but in a real-world environment, it is likely broken up into different departments, AKA organizational units, for example, HR, Finance, IT, Sales...
+
+To mimic this, we can right-click on the domain and go under New > Organizational Unit and name it, for example, "IT", and click OK, and now you have a new organizational unit created.
+
+![image](https://github.com/user-attachments/assets/b1704dfc-7984-4ed3-b2f9-6a02f5cf4226)
+
+Under this "IT" organizational unit, right-click and create a new user, and put a name and username.
+
+Click "Next" and create a password, and finish.
+
+And let's create another organizational unit and create another user under it.
+
+![image](https://github.com/user-attachments/assets/215b2c78-e07f-407b-af6a-06432e118843)
+
+There are many scripts out there that can help auto-create users, groups, and computers, but for this project, it is not necessary.
+
+Now that we have our ADDC, we will now head over to our Windows Target-PC and join it to our newly created domain called "addLAB.local" and authenticate using the "Anil Kumar" account.
+
+Power up our Windows 10 machine and search for PC > Properties > Advanced system settings.
+
+![image](https://github.com/user-attachments/assets/91a2e3b4-e8b0-484f-b2d1-db4df7211c21)
+
+Under the "Computer Name" tab, click "Change" and select "Member of Domain", and write our domain name "addLAB.local".
+
+![image](https://github.com/user-attachments/assets/259378f3-f521-4afd-bf27-6db8bdf11b8c)
+
+When we click OK, we might get an error saying the domain could not be contacted. This is because the machine does not know how to resolve our domain, "adlab.local", and this is how DNS works.
+
+![image](https://github.com/user-attachments/assets/41dbca15-af4c-453a-9892-4130048f3ce0)
+
+To fix this, go to the network adapter > change adapter options > select the adapter and right-click and go to properties and change the DNS server to our ADDC IP.
+
+![image](https://github.com/user-attachments/assets/4b9cd54e-12f1-46c4-babb-3fa5ec6a7431)
+
+And to check the configuration is set, open a command prompt and run `ipconfig /all`.
+
+![image](https://github.com/user-attachments/assets/744702ff-9325-4ce8-a93a-f8ad48534bb3)
+
+Now let's try again to join our domain. And now we are prompted to log in with some credentials.
+
+![image](https://github.com/user-attachments/assets/b8135091-e70a-4bf2-9b55-9b795f21bbe4)
+
+![image](https://github.com/user-attachments/assets/1f856cd0-2011-4967-8cf2-fa393968a255)
+
+In a real-world environment, you would create users and put them into a custom group that is authorized to allow computers to join the domain.
+
+You will be prompted to restart the computer, and once we are on the log-on screen, we want to log in with the "Anil Kumar" account. In order to do so, we want to click on the "Other user" and make sure that our "Sign in to" is pointing to our domain, and we see that it is "ADLAB", so we are good.
+
+![image](https://github.com/user-attachments/assets/3e6f866f-dcd0-45ad-bc06-60d126bc84bb)
+
+After you log in, you might see that some of the usual properties and sections are not accessible, like the PC name. This is because right now this PC belongs to the ADLAB domain, and there are rules in place.
 
 
 
