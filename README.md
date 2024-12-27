@@ -341,6 +341,51 @@ You will be prompted to restart the computer, and once we are on the log-on scre
 
 After you log in, you might see that some of the usual properties and sections are not accessible, like the PC name. This is because right now this PC belongs to the ADLAB domain, and there are rules in place.
 
+## Brute Force Attack with Kali Linux
+Lets start up our kali VM. If you are using it for the first time the username and password would be kali. Once loged in we need to set up our Ip address according to our diagram. For that click on Internet Icon present on top right, click on edit connection. Click on Wired connection, go to the "IPv4 Settings" tab and change the method from "Automatic (DHCP)" to "Manual.  Then click on the "Add" button under the "Addresses" and enter the IP, netmask, and gateway with the DNS server IP, and click "Save".
+
+![image](https://github.com/user-attachments/assets/8ba93a3b-b0b7-4d0b-b48b-6ad4e22ef8c7)
+
+After setting the IP we nned to check it. Therefore, open the terminal and enter `ip a` command to check the IP address  to confirm it. If it hasn't changed, disconnect the internet and reconnect again from the top right menu by clicking the Internet icon and pressing "Disconnect". And we see that the IP is changed.
+
+![image](https://github.com/user-attachments/assets/224c3b05-a132-4a58-ae58-a14b26ff423c)
+
+Now lets check if we can connect to our splunk server to make sure if you have connection.
+
+![image](https://github.com/user-attachments/assets/8940f4c7-e84b-4a91-9127-6c0122efe274)
+
+Now lets update and upgrade our Kali VM, use `sudo apt-get update && sudo apt-get upgrade -y` 
+
+Next we are going to start with our attack. Before that we let us first create a new directory called "ad-lab". `cd Desktop` and `mkdir ad-lab` And all of the files that we will create and use will be put into this directory.
+
+For attack we are going to use crowbar, to install type ` sudo apt-get install -y crowbar`
+This tool is used for brute force attack and we can target either the domain controller or our target machine.
+
+After installing crowbar, we can use the popular wordlist called "rockyou.txt" that comes with Kali Linux. You can find it under `/usr/share/wordlists`.
+
+![image](https://github.com/user-attachments/assets/db110d13-fbac-42f8-860c-14adc65b0ad0)
+
+Let's unzip this file with `sudo gunzip rockyou.txt.gz` And copy the wordlist to our "ad-lab" directory with `cp rockyou.txt ~/Desktop/ad-lab`
+
+Now let's go to our "ad-lab" directory and check the "rockyou.txt" wordlist.
+
+![image](https://github.com/user-attachments/assets/ea07da4f-1ad9-472c-974d-04e7826bec3e)
+
+If you look the "rockyou.txt" os around 130 MB
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
