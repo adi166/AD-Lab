@@ -371,7 +371,17 @@ Now let's go to our "ad-lab" directory and check the "rockyou.txt" wordlist.
 
 ![image](https://github.com/user-attachments/assets/ea07da4f-1ad9-472c-974d-04e7826bec3e)
 
-If you look the "rockyou.txt" os around 130 MB
+If you look the "rockyou.txt" os around 130 MB, and since we are just simulating an attack we donnot need to many passwords. Lets use only 20 password for rockyou.
+
+In order to copy first 20 lines from rockyou use this command : `head -n 20 rockyou.txt > passwords.txt`
+You can see the inside of this file by cat passwords.txt.
+
+As an attacker, we may probablly do a lot of reconniance and as a result you got hold of some information i.e a certain password, so we are going to add that certain password, so that's what we will do with nano passwords.txt.
+
+![image](https://github.com/user-attachments/assets/7d1e973b-cafc-4998-b9f0-aebe5674caf4)
+
+
+
 
 
 
