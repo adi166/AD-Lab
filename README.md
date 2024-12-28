@@ -492,11 +492,12 @@ In this project, we set up an Active Directory environment, installed and config
 
 Key takeaways:
 
-Setting up an Active Directory environment allows us to understand how user and computer management works in an enterprise setting.
-Splunk is a powerful tool for collecting, indexing, and analyzing machine-generated data, which is essential for security monitoring and incident response.
-Brute force attacks are a common threat, and it's crucial to have mechanisms in place to detect and prevent them.
-Atomic Red Team provides a practical way to test our detection and response capabilities against real-world attack techniques.
-Continuous monitoring, tuning, and improvement of our security controls are necessary to stay ahead of evolving threats.
+-  Setting up an Active Directory environment allows us to understand how user and computer management works in an enterprise setting.
+-  Splunk is a powerful tool for collecting, indexing, and analyzing machine-generated data, which is essential for security monitoring and incident response.
+-  Brute force attacks are a common threat, and it's crucial to have mechanisms in place to detect and prevent them.
+-  Atomic Red Team provides a practical way to test our detection and response capabilities against real-world attack techniques.
+-  Continuous monitoring, tuning, and improvement of our security controls are necessary to stay ahead of evolving threats.
+
 By going through this project, we have gained hands-on experience in setting up and securing an Active Directory environment, as well as leveraging Splunk for security monitoring. This knowledge will be valuable in real-world scenarios where securing and monitoring Windows environments is critical.
 
 
