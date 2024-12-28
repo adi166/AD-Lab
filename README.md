@@ -386,29 +386,118 @@ Now before we launch our attack, let's head over to our Windows target machine. 
 
 Here you can search for the names that are members of our AD group "adlab.local". Use the "Check Names" function to find them.
 
+![image](https://github.com/user-attachments/assets/ef92fbe2-adc3-41e3-b8b3-421a22841914)
 
+Click on Ok and Apply, and hence "Remote Desktop" for our targer machine is enabled. 
 
+Now gp back to kali machine and use our tool crowbar. In terminal, now type `crowbar -h` to see the help menu and to see what kind of options are available for us.
 
+![image](https://github.com/user-attachments/assets/de00a116-2915-4de9-a65b-d5344d81f980)
 
+The service we are intrested in is Remote Desktop Protocol i.e RDP. The command we would use with crowbar is : crowbar -b rdp -u akumar -C passwords.txt -s 192.168.10.100/32
 
+Now to explain this command:
 
+- -b rdp is to select which service you want to use.
+- -u akumar is the username that we are targeting.
+- -C passwords.txt is to specify the password list that we want to use.
+- -s is to specify the IP, and we entered the target machine's IP.
+-  /32 is to specify that this is only 1 IP address.
 
+![image](https://github.com/user-attachments/assets/022b9b25-b2a9-4474-a8a4-25bacefcb72a)
 
+It actually starts and tries every password on the list. And from the result, we can see that we have an RDP success with the username "akumar" and password "pass_4510".
 
+Now let's head over to Splunk and see what telemetry we had generated. In Splunk, go to "Search & Reporting". Because we know when the attack occurred, let's filter it out by the last 15 minutes. And also, we know the targeted user was "Anil Kumar". By using these, let's narrow down our search.
 
+![image](https://github.com/user-attachments/assets/11334a41-a6d2-4364-abde-9d1f48ceab77)
 
+Now on the left side, we have interesting fields. And if we look at "# EventCode", we see that an event ID of 4625 occurred 20 times. Let's search this event ID to see what that is.
 
+![image](https://github.com/user-attachments/assets/714a0756-a444-424d-a922-72fb5d1ea2e3)
 
+So this means that there were 20 failed attempts to log in to Anil's account, which is correct because if you recall, there was a total of 21 passwords in the "passwords.txt" file, of which 20 were incorrect. Let's filter down the EventCode 4625 by clicking on it.
 
+![image](https://github.com/user-attachments/assets/e539e32f-3748-4e3e-8caf-3371d2f65548)
 
+Now when you see the times of these 20 events, you will see that all these events are happening pretty much at the same time, which can be a clear indication of brute force activity.
 
+Now if we look at the EventCode 4624, you will see only one event.
 
+![image](https://github.com/user-attachments/assets/fa4f60ff-dc0b-40b4-8ebe-2da984e8465f)
 
+And when we search for the event of 4624, we see that it is a successfully logged-on event.
 
+![image](https://github.com/user-attachments/assets/ede97b35-3d8f-4e1a-9fe6-b65dc4977b66)
 
+Now let's expand the log by clicking on "Show all 70 lines" and scroll down a bit.
 
+![image](https://github.com/user-attachments/assets/1895a7d0-4680-4f0d-9299-2f8e2c49ca0d)
 
+We do happen to see our workstation name as "Kali" and the IP address it is trying to log in from, and this does indeed belong to our Kali Linux machine.
 
+## Testing with Atomic Red Team
+Atomic Red Team™ is a popular library of tests and related tools powered by Red Canary. Any security team can use these open source tools to emulate MITRE ATT&CK® techniques and test their defenses. These tests help security teams evaluate and improve their detection and response capabilities by identifying gaps in their defenses. The tests are easy to use, well-documented, and can be tailored to fit various environments.
+
+Now let's install Atomic Red Team on our target machine and run some tests on it. Let's open a PowerShell with administrator privileges and then run the following command: `Set-ExecutionPolicy Bypass -Scope CurrentUser`, then enter "Y" to confirm.
+
+Now before installing Atomic Red Team on this PC, let's set an exclusion for the entire C drive because Microsoft Defender will detect and remove some of the files of Atomic Red Team.
+
+Go to Windows Security > Virus & threat protection > Manage Settings > Exclusions.
+Then click on the "Add an exclusion" button > "Folder" and select our C drive.
+
+![image](https://github.com/user-attachments/assets/6cb394e2-a98e-4875-9c0c-e2e7843a8592)
+
+And you should be able to see "C:/" under the exclusions now. And we can now install Atomic Red Team by using these two commands:
+
+`IEX (IWR 'https://raw.githubusercontent.com/redcanaryco/invoke-atomicredteam/master/install-atomicredteam.ps1' -UseBasicParsing)`; and then `Install-AtomicRedTeam -getAtomics`
+Enter "Y" when prompted.
+![image](https://github.com/user-attachments/assets/c6718764-ce47-41ff-b4e7-2b6c9f78dc65)
+
+After installation, go into the C drive, and inside the "AtomicRedTeam" directory, there is an "atomics" folder. Here we see a bunch of technique IDs, and these map back to the MITRE ATT&CK framework. When we go to MITRE ATT&CK®, all of these techniques have a unique ID.
+
+Let's say we want to test "T1136: Create Account" under the Persistence tab. And we see that we have 3 of them in our "atomics" folder.
+
+And when we check on the MITRE ATT&CK website, we see that 001 is for Local, 002 is for Domain, and 003 is for Cloud Account.
+
+In this example, let's go ahead and use the first one, T1136.001. To do this, we go back to PowerShell and write this command: `Invoke-AtomicTest T1136.001` and this will automatically generate telemetry based on creating a local account.
+
+![image](https://github.com/user-attachments/assets/6e6fa8ad-9538-42ad-b911-4dbf1090d380)
+
+And now that our command has finished running, we can go and look into Splunk and search specifically for "new local user".
+
+![image](https://github.com/user-attachments/assets/473fc360-09b5-442e-8174-65d46114e1c1)
+
+And we observed 12 raw events related to the activity. This confirms that our monitoring setup is capturing relevant data for this type of attack technique. The detailed logging will help us analyze and improve our detection and response capabilities.
+
+Let's try another one, "T1059: Command and Scripting Interpreter".
+
+![image](https://github.com/user-attachments/assets/9bb61ffd-17ff-4f44-a3a5-efd9fa930614)
+
+Let's go with PowerShell, which is T1059.001.
+
+Running this code, Defender catches a couple of things, and let's see what is going on with Splunk.
+
+Run the search with index=endpoint powershell, and we see that 401 events occurred in the last 15 minutes. And for example, when we check this event:
+
+![image](https://github.com/user-attachments/assets/b233b72f-d302-45a5-af04-2c7d40d3b332)
+
+We actually see that this event indicates that the PowerShell executable (`powershell.exe`) running under the `ADLAB\Administrator` account modified a registry value. Specifically, the registry key `HKLM\System\CurrentControlSet\Services\bam\State\UserSettings` was altered. The bam registry key typically relates to the Background Activity Moderator, which Windows uses to manage app background activity.
+
+The event captured shows the simulated attack test (T1059.001) modifying a registry value using PowerShell. It indicates that our Sysmon configuration is capturing relevant events, which is crucial for detecting and responding to such activities. Review the surrounding events for a complete picture and ensure your detection mechanisms in Splunk are tuned to catch and alert on such activities.
+
+## Conclusion
+
+In this project, we set up an Active Directory environment, installed and configured Splunk to ingest logs from our Windows machines, performed a brute force attack using Kali Linux, and tested our detection capabilities using Atomic Red Team.
+
+Key takeaways:
+
+Setting up an Active Directory environment allows us to understand how user and computer management works in an enterprise setting.
+Splunk is a powerful tool for collecting, indexing, and analyzing machine-generated data, which is essential for security monitoring and incident response.
+Brute force attacks are a common threat, and it's crucial to have mechanisms in place to detect and prevent them.
+Atomic Red Team provides a practical way to test our detection and response capabilities against real-world attack techniques.
+Continuous monitoring, tuning, and improvement of our security controls are necessary to stay ahead of evolving threats.
+By going through this project, we have gained hands-on experience in setting up and securing an Active Directory environment, as well as leveraging Splunk for security monitoring. This knowledge will be valuable in real-world scenarios where securing and monitoring Windows environments is critical.
 
 
 
