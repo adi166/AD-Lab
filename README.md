@@ -380,6 +380,11 @@ As an attacker, we may probablly do a lot of reconniance and as a result you got
 
 ![image](https://github.com/user-attachments/assets/7d1e973b-cafc-4998-b9f0-aebe5674caf4)
 
+Now before we launch our attack, let's head over to our Windows target machine. On this machine, we want to enable Remote Desktop. And to do that, we want to search for "PC" and then "Properties" > "Advanced system settings". It will ask you for the admin username and password; enter them and continue. (This is the username and password for ADDC.)
+
+![image](https://github.com/user-attachments/assets/56c179d8-b747-4384-8927-6dd441d2b10b)
+
+Here you can search for the names that are members of our AD group "adlab.local". Use the "Check Names" function to find them.
 
 
 
