@@ -3,7 +3,11 @@
 ## Index
 - [Introduction](#introduction)
 - [Setup VMs](#setup-vms)
--   
+- [Installation of Software](#installation-of-software)
+- [Install and Configure Active Directory](#install-and-configure-active-directory)
+- [Brute Force Attack with Kali Linux](#brute-force-attack-with-kali-linux)
+- [Testing with Atomic Red Team](#testing-with-atomic-red-team)
+- [Conclusion](#conclusion) 
 
 ## Introduction
 The primary objective of this project is to design and implement an Active Directory environment integrated with Splunk for comprehensive event monitoring and analysis. By simulating a brute force attack using Kali Linux and conducting additional testing with Atomic Red Team, the project aims to provide hands-on experience in setting up and managing IT infrastructure, detecting potential threats, and analyzing system events. This initiative is intended to enhance skills in IT administration, event telemetry, threat detection, and response, equipping participants with practical knowledge for real-world cybersecurity challenges.
